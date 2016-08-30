@@ -1,9 +1,9 @@
 ---
 layout:     post
-title:      "Welcome to Hux Blog"
+title:      "Welcome to Mipaifu328 Blog"
 subtitle:   " \"Hello World, Hello Blog\""
-date:       2015-01-29 12:00:00
-author:     "Hux"
+date:       2016-08-30 17:26:00
+author:     "Mipaifu328"
 header-img: "img/post-bg-2015.jpg"
 tags:
     - 生活
@@ -14,7 +14,7 @@ tags:
 
 ## 前言
 
-mipaifu328 的 Blog 就这么开通了。
+Mipaifu328 的 Blog 就这么开通了。
 
 ---
 
@@ -36,4 +36,4 @@ mipaifu328 的 Blog 就这么开通了。
 
 第一次还不是很熟悉
 
-—— mipaifu328 后记于 2016.8.30
+—— Mipaifu328 后记于 2016.8.30
