@@ -68,7 +68,7 @@ duoshuo_share: true                     # set to false if you want to use Commen
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "求追：无一日之懈怠，无一事之马虎，这种状态"
+sidebar-about-description: "求追：无一日之懈怠，无一事之马虎"
 sidebar-avatar: /img/mipaifu328.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
