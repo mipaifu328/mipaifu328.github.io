@@ -5,7 +5,7 @@ header-img: img/home-bg.jpg
 email: mipaifu328@163.com
 description: "mipaifu328,个人博客, mipaifu328博客 ,陈耿生的博客"
 keyword: "mipaifu328, 个人博客, mipaifu328个人网站, 陈耿生"
-url: "http://mipaifu328.com"              # your host, for absolute URL
+url: "http://www.mipaifu328.com"              # your host, for absolute URL
 baseurl: ""         # for example, '/blog' if your blog hosted on 'host/blog'
 
 
@@ -83,6 +83,6 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 friends: [
     {
         title: "mipaifu328",
-        href: "http://mipaifu328.com"
+        href: "http://www.mipaifu328.com"
     }
 ]
