@@ -14,7 +14,7 @@ tag:
 > webpack 会在构建中解析代码中的 require.context() 。
 
 - `require.context()`可以给这个函数传入三个参数：一个要搜索的目录，一个标记表示是否还搜索其子目录， 以及一个匹配文件的正则表达式。
-- 一个 context module `会导出一个（require）函数`，此函数可以接收一个参数：request。
+- `返回一个（require）函数`，此函数可以接收一个参数：request。
 此导出函数有三个属性：`resolve, keys, id`
   - resolve 是一个函数，它返回 request 被解析后得到的模块 id (传入keys某个模块，返回绝对路径)
   - keys 也是一个函数，返回匹配成功模块的名字组成的数组
@@ -36,3 +36,12 @@ tag:
 ```
 
 [webpack require.context API](https://webpack.docschina.org/guides/dependency-management/#requirecontext)
+
+# 应用场景
+
+## js自动导入
+
+如果遇到从一个文件夹引入很多模块的情况,,可以使用这个api,它会遍历文件夹中的指定文件,然后自动导入,使得不需要每次显式的调用import导入模块。
+
+## svg自动导入
+[手摸手，带你优雅的使用 icon](https://juejin.im/post/6844903517564436493)
