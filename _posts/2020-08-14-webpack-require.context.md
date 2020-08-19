@@ -41,7 +41,37 @@ tag:
 
 ## js自动导入
 
-如果遇到从一个文件夹引入很多模块的情况,,可以使用这个api,它会遍历文件夹中的指定文件,然后自动导入,使得不需要每次显式的调用import导入模块。
+如果遇到从一个文件夹引入很多模块的情况,可以使用这个api,它会遍历文件夹中的指定文件,然后自动导入,使得不需要每次显式的调用import导入模块。
+
+> 举例`vue-element-admin`里的vuex store > index.js
+
+``` js
+import Vue from 'vue'
+import Vuex from 'vuex'
+import getters from './getters'
+
+Vue.use(Vuex)
+
+// https://webpack.js.org/guides/dependency-management/#requirecontext
+const modulesFiles = require.context('./modules', true, /\.js$/)
+
+// you do not need `import app from './modules/app'`
+// it will auto require all vuex module from modules file
+const modules = modulesFiles.keys().reduce((modules, modulePath) => {
+  // set './app.js' => 'app'
+  const moduleName = modulePath.replace(/^\.\/(.*)\.\w+$/, '$1')
+  const value = modulesFiles(modulePath)
+  modules[moduleName] = value.default
+  return modules
+}, {})
+
+const store = new Vuex.Store({
+  modules,
+  getters
+})
+
+export default store
+```
 
 ## svg自动导入
 [手摸手，带你优雅的使用 icon](https://juejin.im/post/6844903517564436493)
