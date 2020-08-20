@@ -166,6 +166,15 @@ layout: default
         ds.charset = 'UTF-8';
         (document.getElementsByTagName('head')[0] 
          || document.getElementsByTagName('body')[0]).appendChild(ds);
+
+        // 博客外连接连接，新窗口打开
+        document.querySelectorAll('a').forEach(function(item){
+            if( item.href && item.href.indexOf('http') == 0 &&  item.href.indexOf('www.mipaifu328.com') === -1) {
+                item.setAttribute('target', '_blank')
+            }
+        })
+
+})
     })();
 </script>
 <!-- 多说公共JS代码 end -->
