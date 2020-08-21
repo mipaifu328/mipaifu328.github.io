@@ -1,0 +1,284 @@
+I"'N<ol>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">不要在选项 property 或回调上使用箭头函数</code>，比如 created: () =&gt; console.log(this.a) 或 vm.$watch(‘a’, newValue =&gt; this.myMethod())。因为箭头函数并没有 this，this 会作为变量一直向上级词法作用域查找，直至找到为止，经常导致 Uncaught TypeError: Cannot read property of undefined 或 Uncaught TypeError: this.myMethod is not a function 之类的错误。</p>
+  </li>
+  <li>
+    <p><code class="language-plaintext highlighter-rouge">created后，data和methods才初始化；mounted后， $el元素才挂在到页面，可以访问。</code></p>
+  </li>
+  <li>methods，computed，watch使用场景
+    <ul>
+      <li>methods：每当触发重新渲染时，调用方法将<code class="language-plaintext highlighter-rouge">总会再次执行函数</code>。</li>
+      <li>computed：计算属性是基于它们的<code class="language-plaintext highlighter-rouge">响应式依赖进行缓存</code>的。只在相关响应式依赖发生改变时它们才会重新求值。</li>
+      <li>watch：当需要在数据变化时<code class="language-plaintext highlighter-rouge">执行异步或开销较大的操作</code>时，这个方式是最有用的。</li>
+    </ul>
+  </li>
+  <li>数组方法触发更新视图：<code class="language-plaintext highlighter-rouge">push()，pop()，shift()，unshift()，splice()，sort()，reverse()</code>不更新视图的：<code class="language-plaintext highlighter-rouge">filter()、concat() 和 slice()</code>。它们不会变更原始数组，而总是返回一个新数组</li>
+  <li><code class="language-plaintext highlighter-rouge">.sync</code> 双向绑定，子组件修改父组件传过来的props <a href="https://cn.vuejs.org/v2/guide/components-custom-events.html#sync-%E4%BF%AE%E9%A5%B0%E7%AC%A6">详情</a></li>
+</ol>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// info.vue 子组件</span>
+  <span class="nx">methods</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nx">onInput</span><span class="p">(</span><span class="nx">e</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">$emit</span><span class="p">(</span><span class="dl">"</span><span class="s2">update:value</span><span class="dl">"</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">target</span><span class="p">.</span><span class="nx">value</span><span class="p">)</span>    
+    <span class="p">}</span> 
+  <span class="p">}</span> 
+</code></pre></div></div>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- index.vue 父组件 --&gt;</span>
+  <span class="nt">&lt;info</span> <span class="na">:value.sync=</span><span class="s">"myValue"</span><span class="nt">&gt;&lt;/info&gt;</span>
+</code></pre></div></div>
+
+<ol>
+  <li>子组件想修改props的2种常见情景
+    <ul>
+      <li>这个prop 用来传递一个初始值；这个子组件接下来希望将其作为一个本地的 prop 数据来使用。在这种情况下，最好定义一个本地的 <code class="language-plaintext highlighter-rouge">data</code> property 并将这个 prop 用作其初始值。</li>
+      <li>这个 prop 以一种原始的值传入且需要进行转换。在这种情况下，最好使用这个 prop 的值来定义一个<code class="language-plaintext highlighter-rouge">计算属性</code>.</li>
+    </ul>
+  </li>
+  <li>将原生事件绑定到组件<code class="language-plaintext highlighter-rouge">.native </code>元素刚好为根元素。如果遇到<code class="language-plaintext highlighter-rouge">非根元素</code>则可以使用<code class="language-plaintext highlighter-rouge">$listeners</code> <a href="https://cn.vuejs.org/v2/guide/components-custom-events.html#%E5%B0%86%E5%8E%9F%E7%94%9F%E4%BA%8B%E4%BB%B6%E7%BB%91%E5%AE%9A%E5%88%B0%E7%BB%84%E4%BB%B6">详情</a></li>
+  <li>卡槽 <a href="https://cn.vuejs.org/v2/guide/components-slots.html">详情</a>
+    <ul>
+      <li>后备内容</li>
+    </ul>
+  </li>
+</ol>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;slot&gt;</span>Submit<span class="nt">&lt;/slot&gt;</span>
+  <span class="nt">&lt;/button&gt;</span>
+
+  <span class="nt">&lt;submit-button&gt;&lt;/submit-button&gt;</span>
+  <span class="c">&lt;!-- 后备内容“Submit”将会被渲染 --&gt;</span>
+  <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>
+    Submit
+  <span class="nt">&lt;/button&gt;</span>
+
+  <span class="nt">&lt;submit-button&gt;</span>Save<span class="nt">&lt;/submit-button&gt;</span>
+  <span class="c">&lt;!-- 后备内容“Submit”将会被渲染 --&gt;</span>
+  <span class="nt">&lt;button</span> <span class="na">type=</span><span class="s">"submit"</span><span class="nt">&gt;</span>
+    Save
+  <span class="nt">&lt;/button&gt;</span>
+
+</code></pre></div></div>
+
+<ul>
+  <li>作用域</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">&lt;navigation-link</span> <span class="na">url=</span><span class="s">"/profile"</span><span class="nt">&gt;</span>
+  Clicking here will send you to: 
+  <span class="c">&lt;!--
+  这里的 `url` 会是 undefined，因为其 (指该插槽的) 内容是
+  _传递给_ &lt;navigation-link&gt; 的而不是
+  在 &lt;navigation-link&gt; 组件*内部*定义的。
+  --&gt;</span>
+<span class="nt">&lt;/navigation-link&gt;</span>
+
+<span class="c">&lt;!-- 作用域插槽 --&gt;</span>
+<span class="c">&lt;!-- 子组件 --&gt;</span>
+<span class="nt">&lt;span&gt;</span>
+  <span class="nt">&lt;slot</span> <span class="na">v-bind:user=</span><span class="s">"user"</span><span class="nt">&gt;</span>
+    
+  <span class="nt">&lt;/slot&gt;</span>
+<span class="nt">&lt;/span&gt;</span>
+
+<span class="c">&lt;!-- 父组件 --&gt;</span>
+<span class="nt">&lt;current-user&gt;</span>
+  <span class="nt">&lt;template</span> <span class="na">v-slot:default=</span><span class="s">"slotProps"</span><span class="nt">&gt;</span>
+    
+  <span class="nt">&lt;/template&gt;</span>
+<span class="nt">&lt;/current-user&gt;</span>
+
+<span class="c">&lt;!-- 独占默认插槽可以简写 --&gt;</span>
+<span class="nt">&lt;current-user</span> <span class="na">v-slot=</span><span class="s">"slotProps"</span><span class="nt">&gt;</span>
+  
+<span class="nt">&lt;/current-user&gt;</span>
+
+</code></pre></div></div>
+
+<blockquote>
+  <p>父级模板里的所有内容都是在父级作用域中编译的；子模板里的所有内容都是在子作用域中编译的。</p>
+</blockquote>
+
+<ul>
+  <li>具名插槽</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c">&lt;!-- 子组件base-layout --&gt;</span>
+  <span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">"container"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;header&gt;</span>
+      <span class="nt">&lt;slot</span> <span class="na">name=</span><span class="s">"header"</span><span class="nt">&gt;&lt;/slot&gt;</span>
+    <span class="nt">&lt;/header&gt;</span>
+    <span class="nt">&lt;main&gt;</span>
+      <span class="nt">&lt;slot&gt;&lt;/slot&gt;</span>
+    <span class="nt">&lt;/main&gt;</span>
+    <span class="nt">&lt;footer&gt;</span>
+      <span class="nt">&lt;slot</span> <span class="na">name=</span><span class="s">"footer"</span><span class="nt">&gt;&lt;/slot&gt;</span>
+    <span class="nt">&lt;/footer&gt;</span>
+  <span class="nt">&lt;/div&gt;</span>
+
+  <span class="c">&lt;!-- 父组件 --&gt;</span>
+  <span class="nt">&lt;base-layout&gt;</span>
+    <span class="nt">&lt;template</span> <span class="na">v-slot:header</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;h1&gt;</span>Here might be a page title<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;/template&gt;</span>
+
+    <span class="nt">&lt;template</span> <span class="na">v-slot:default</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;p&gt;</span>A paragraph for the main content.<span class="nt">&lt;/p&gt;</span>
+      <span class="nt">&lt;p&gt;</span>And another one.<span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;/template&gt;</span>
+
+    <span class="nt">&lt;template</span> <span class="na">v-slot:footer</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;p&gt;</span>Here's some contact info<span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;/template&gt;</span>
+  <span class="nt">&lt;/base-layout&gt;</span>
+
+  <span class="c">&lt;!-- 缩写 --&gt;</span>
+  <span class="nt">&lt;base-layout&gt;</span>
+    <span class="nt">&lt;template</span> <span class="na">#header</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;h1&gt;</span>Here might be a page title<span class="nt">&lt;/h1&gt;</span>
+    <span class="nt">&lt;/template&gt;</span>
+
+    <span class="nt">&lt;p&gt;</span>A paragraph for the main content.<span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;p&gt;</span>And another one.<span class="nt">&lt;/p&gt;</span>
+
+    <span class="nt">&lt;template</span> <span class="na">#footer</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;p&gt;</span>Here's some contact info<span class="nt">&lt;/p&gt;</span>
+    <span class="nt">&lt;/template&gt;</span>
+  <span class="nt">&lt;/base-layout&gt;</span>
+</code></pre></div></div>
+
+<ol>
+  <li>跨组件之间的访问
+    <ul>
+      <li>访问父组件或者根组件 <code class="language-plaintext highlighter-rouge">$parent, $root</code>，多层关系使用依赖注入<code class="language-plaintext highlighter-rouge">provide 和 inject</code></li>
+      <li>访问子组件 <code class="language-plaintext highlighter-rouge">$refs</code></li>
+      <li>vuex</li>
+    </ul>
+  </li>
+  <li>过度动画<code class="language-plaintext highlighter-rouge">transition</code> <a href="https://cn.vuejs.org/v2/guide/transitions.html">官方地址</a>
+    <ul>
+      <li>对于这些在过渡中切换的类名来说，如果你使用一个没有名字的 <code class="language-plaintext highlighter-rouge">&lt;transition&gt;</code>，则 <code class="language-plaintext highlighter-rouge">v-</code> 是这些类名的默认前缀。如果你使用了 <code class="language-plaintext highlighter-rouge">&lt;transition name="my-transition"&gt;</code>，那么 <code class="language-plaintext highlighter-rouge">v-enter</code> 会替换为 <code class="language-plaintext highlighter-rouge">my-transition-enter</code>。<code class="language-plaintext highlighter-rouge">v-enter-active</code> 和 <code class="language-plaintext highlighter-rouge">v-leave-active</code> 可以控制进入/离开过渡的不同的缓和曲线。</li>
+    </ul>
+  </li>
+</ol>
+
+<p><img src="https://cn.vuejs.org/images/transition.png" alt="vue动画" /></p>
+
+<ul>
+  <li>自定义过渡类名。第三方css动画库 <a href="https://animate.style/">Animate.css</a></li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="c">&lt;!-- 
+      enter-class
+      enter-active-class
+      enter-to-class (2.1.8+)
+      leave-class
+      leave-active-class
+      leave-to-class (2.1.8+)
+    --&gt;</span>
+    <span class="nt">&lt;transition</span> 
+      <span class="na">enter-active-class=</span><span class="s">"animate__animated animate__bounce"</span> <span class="na">leave-active-class=</span><span class="s">"animate__animated animate__backOutRight"</span>
+    <span class="nt">&gt;</span>
+      <span class="nt">&lt;img</span> <span class="na">v-show=</span><span class="s">"isVisible"</span> <span class="na">alt=</span><span class="s">"Vue logo"</span> <span class="na">src=</span><span class="s">"../assets/logo.png"</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;/transition&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>钩子函数</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    <span class="nt">&lt;transition</span>
+      <span class="na">v-on:before-enter=</span><span class="s">"beforeEnter"</span>
+      <span class="na">v-on:enter=</span><span class="s">"enter"</span>
+      <span class="na">v-on:after-enter=</span><span class="s">"afterEnter"</span>
+      <span class="na">v-on:enter-cancelled=</span><span class="s">"enterCancelled"</span>
+
+      <span class="na">v-on:before-leave=</span><span class="s">"beforeLeave"</span>
+      <span class="na">v-on:leave=</span><span class="s">"leave"</span>
+      <span class="na">v-on:after-leave=</span><span class="s">"afterLeave"</span>
+      <span class="na">v-on:leave-cancelled=</span><span class="s">"leaveCancelled"</span>
+    <span class="nt">&gt;</span>
+      <span class="c">&lt;!-- ... --&gt;</span>
+    <span class="nt">&lt;/transition&gt;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>当只用 JavaScript 过渡的时候，在 <code class="language-plaintext highlighter-rouge">enter</code> 和 <code class="language-plaintext highlighter-rouge">leave</code> 中必须使用 <code class="language-plaintext highlighter-rouge">done</code> 进行回调。否则，它们将被同步调用，过渡会立即完成。</p>
+</blockquote>
+
+<blockquote>
+  <p>推荐对于仅使用 JavaScript 过渡的元素添加 <code class="language-plaintext highlighter-rouge">v-bind:css="false"</code>，Vue 会跳过 CSS 的检测。这也可以避免过渡过程中 CSS 的影响。</p>
+</blockquote>
+
+<ul>
+  <li>初始化过渡</li>
+</ul>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;transition</span>
+    <span class="na">appear</span>
+    <span class="na">appear-class=</span><span class="s">"custom-appear-class"</span>
+    <span class="na">appear-to-class=</span><span class="s">"custom-appear-to-class"</span>
+    <span class="na">appear-active-class=</span><span class="s">"custom-appear-active-class"</span>
+  <span class="nt">&gt;</span>
+    <span class="c">&lt;!-- ... --&gt;</span>
+  <span class="nt">&lt;/transition&gt;</span>
+</code></pre></div></div>
+
+<ul>
+  <li>多个元素的过渡
+    <blockquote>
+      <p>当有相同标签名的元素切换时，需要通过 key attribute 设置唯一的值来标记以让 Vue 区分它们，否则 Vue 为了效率只会替换相同标签内部的内容。即使在技术上没有必要，给在 <transition> 组件中的多个元素设置 key 是一个更好的实践。</transition></p>
+    </blockquote>
+  </li>
+</ul>
+
+<ol>
+  <li><a href="https://cn.vuejs.org/v2/guide/render-function.html">渲染函数与JSX</a></li>
+</ol>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">Vue</span><span class="p">.</span><span class="nx">component</span><span class="p">(</span><span class="dl">'</span><span class="s1">anchored-heading</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+    <span class="na">render</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">createElement</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">createElement</span><span class="p">(</span>
+        <span class="dl">'</span><span class="s1">h</span><span class="dl">'</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">level</span><span class="p">,</span>   <span class="c1">// 标签名称</span>
+        <span class="c1">// 子节点数组</span>
+        <span class="p">[</span>
+          <span class="nx">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">a</span><span class="dl">'</span><span class="p">,</span> <span class="p">{</span>
+            <span class="na">attrs</span><span class="p">:</span> <span class="p">{</span>
+              <span class="na">name</span><span class="p">:</span> <span class="nx">headingId</span><span class="p">,</span>
+              <span class="na">href</span><span class="p">:</span> <span class="dl">'</span><span class="s1">#</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">headingId</span>
+            <span class="p">}</span>
+          <span class="p">},</span> <span class="k">this</span><span class="p">.</span><span class="nx">$slots</span><span class="p">.</span><span class="k">default</span><span class="p">)</span>
+        <span class="p">]</span>
+      <span class="p">)</span>
+    <span class="p">},</span>
+    <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">level</span><span class="p">:</span> <span class="p">{</span>
+        <span class="na">type</span><span class="p">:</span> <span class="nb">Number</span><span class="p">,</span>
+        <span class="na">required</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">})</span>
+
+  <span class="c1">// &lt;h1&gt;&lt;/h1&gt; 等价于</span>
+  <span class="nx">render</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">createElement</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">h1</span><span class="dl">'</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">blogTitle</span><span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// JSX</span>
+  <span class="nl">render</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">h</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="o">&lt;</span><span class="nx">AnchoredHeading</span> <span class="nx">level</span><span class="o">=</span><span class="p">{</span><span class="mi">1</span><span class="p">}</span><span class="o">&gt;</span>
+        <span class="o">&lt;</span><span class="nx">span</span><span class="o">&gt;</span><span class="nx">Hello</span><span class="o">&lt;</span><span class="sr">/span&gt; world</span><span class="err">!
+</span>      <span class="o">&lt;</span><span class="sr">/AnchoredHeading</span><span class="err">&gt;
+</span>    <span class="p">)</span>
+  <span class="p">}</span>
+
+  <span class="c1">// 函数式组件</span>
+  <span class="nl">functional</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="nx">render</span><span class="p">:</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">createElement</span><span class="p">,</span> <span class="nx">context</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 完全透传任何 attribute、事件监听器、子节点等。</span>
+    <span class="k">return</span> <span class="nx">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">button</span><span class="dl">'</span><span class="p">,</span> <span class="nx">context</span><span class="p">.</span><span class="nx">data</span><span class="p">,</span> <span class="nx">context</span><span class="p">.</span><span class="nx">children</span><span class="p">)</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+:ET

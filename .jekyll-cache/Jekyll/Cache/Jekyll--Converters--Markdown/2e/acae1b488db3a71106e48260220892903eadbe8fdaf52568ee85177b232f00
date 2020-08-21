@@ -1,0 +1,31 @@
+I"�<h1 id="mac开发环境配置">Mac开发环境配置</h1>
+
+<ol>
+  <li>homebrew安装：官网地址（https://brew.sh）
+<code class="language-plaintext highlighter-rouge">/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)”</code></li>
+  <li>Iterm2 官网地址（https://www.iterm2.com)</li>
+  <li>安装zsh <code class="language-plaintext highlighter-rouge">brew install zsh</code>，修改默认shell <code class="language-plaintext highlighter-rouge">chsh -s /bin/zsh</code>(安装oh-my-zsh后也会修改默认shell)</li>
+  <li>安装oh-my-zsh <code class="language-plaintext highlighter-rouge">sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"</code></li>
+</ol>
+
+<p>……待续补充</p>
+
+<h1 id="github个人博客环境安装">Github个人博客环境安装</h1>
+
+<p>因为之前的博客时采用jekyll搭建的，所以在mac上也要搭建下环境。</p>
+
+<ol>
+  <li>安装ruby，<code class="language-plaintext highlighter-rouge">brew install ruby</code></li>
+  <li>安装jekyll，<code class="language-plaintext highlighter-rouge">sudo gem install jekyll</code></li>
+  <li>安装运行项目所需项
+  <code class="language-plaintext highlighter-rouge">sudo gem install bundler</code>
+  <code class="language-plaintext highlighter-rouge">sudo gem install jekyll-paginate</code>
+  <code class="language-plaintext highlighter-rouge">sudo gem install jekyll-gist</code></li>
+  <li>启动服务，进入博客项目路径<code class="language-plaintext highlighter-rouge">jeklly serve</code></li>
+  <li>配置ssh 
+<code class="language-plaintext highlighter-rouge">cd  ～/.ssh</code>
+<code class="language-plaintext highlighter-rouge">ssh-keygen -t rsa -C 你的邮箱</code>回车3次（免密码）
+<code class="language-plaintext highlighter-rouge">cd ~/.sshmore id_rsa.pub</code> 密钥生成（ssh-rsa……你的邮箱）
+到github博客项目setting-deploy keys-add new(记得勾选Allow write access，读写权限)</li>
+</ol>
+:ET

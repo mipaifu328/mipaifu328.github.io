@@ -1,0 +1,55 @@
+I"�<p>今天因为要重新配置jekyll环境，发现之前搭建博客的流程都忘了…<img src="http://upload-images.jianshu.io/upload_images/10171700-d8a44b67481dd438.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="我的天~" />
+感觉还是要记录下来，方便自己以后查看。</p>
+
+<h2 id="本地环境搭建">本地环境搭建</h2>
+
+<ul>
+  <li>安装 ruby
+我的是Window 系统，使用 RubyInstaller 来安装 Ruby 环境，<a href="https://rubyinstaller.org/downloads/">Ruby下载地址</a>
+安装时记得勾选 Add Ruby executables to your PATH，没的话就自己配置下环境变量。
+安装成功后，运行<code class="language-plaintext highlighter-rouge">ruby -v</code>，能显示出版本信息就OK。</li>
+  <li>安装 jekyll
+接着运行<code class="language-plaintext highlighter-rouge">gem install jekyll</code>，会默认帮你装RubyGems，如果没有 MSYS2，会提示你安装<code class="language-plaintext highlighter-rouge">ridk install</code>
+执行完<code class="language-plaintext highlighter-rouge">gem install jekyll</code>，jekyll就安装好了。</li>
+  <li>运行博客项目
+进入博客项目目录，执行<code class="language-plaintext highlighter-rouge">jekyll serve</code>。
+如果有遇到报这个错<code class="language-plaintext highlighter-rouge">you don't have jekyll-paginate or one of its dependencies installed....</code>，就直接执行<code class="language-plaintext highlighter-rouge">gem install jekyll-paginate</code>。</li>
+</ul>
+
+<h2 id="github-pages">Github Pages</h2>
+<p>登陆github，创建一个Repository，命名为<code class="language-plaintext highlighter-rouge">username.github.com</code>(这里的username是指Github上的用户名)，选择Public仓库类型。
+<img src="http://upload-images.jianshu.io/upload_images/10171700-26f1336a26fe2fa6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="创建Repository" /></p>
+
+<p>创建成功后，进入该仓库，选择进入<strong>setting</strong>，点击<strong>Launch automatic page generator</strong>，编辑下标题和描述，选择任意一个模板点击<strong>Publish</strong>。</p>
+
+<p>浏览器访问 http://username.github.io 就能看到你的博客首页了。</p>
+
+<h2 id="将本地jekyll代码部署到github上的仓库">将本地jekyll代码部署到Github上的仓库</h2>
+
+<ul>
+  <li>安装<a href="https://desktop.github.com/">GitHub Desktop</a>，将你的username.github.io仓库克隆到本地。</li>
+  <li>删除username.github.io下面的示例文件，拷贝本地博客项目的所有目录及文件到username.github.io</li>
+  <li>发布到GitHub，稍等一两分钟就能在username.github.io上面看到你的博客页面更新了。</li>
+</ul>
+
+<h2 id="绑定个人域名">绑定个人域名</h2>
+
+<ul>
+  <li>在username.github.io目录下增加一个CNAME文件。在里面添加你的域名，假设为www.example.com，然后推送CNAME文件到远程仓库。</li>
+</ul>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/10171700-b2da334d06aa3a71.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="CNAME文件" /></p>
+
+<ul>
+  <li>购买域名，进入域名管理，添加解析。
+添加一个CNAME，主机记录写www，后面记录值也是http://xxxx.github.io，也有人使用A记录，后面的记录值是写github page里面的ip地址，但有时候IP地址会更改，导致最后解析不正确，所以还是推荐用CNAME别名记录要好些，不建议用IP。</li>
+</ul>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/10171700-1da02f51c74aaff5.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="添加解析" /></p>
+
+<p>设置成功后，等几分钟就就能直接访问你的域名了。</p>
+
+<p><img src="http://upload-images.jianshu.io/upload_images/10171700-59c244a218c234f5.gif?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="搞定~~" /></p>
+
+<p>好多地方没截图，是因为我的github pages之前就已经创建了。所以只能把大概的流程记录下来。</p>
+:ET

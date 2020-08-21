@@ -1,0 +1,182 @@
+I"d@<h1 id="api-介绍">API 介绍</h1>
+
+<blockquote>
+  <p>webpack 会在构建中解析代码中的 require.context() 。</p>
+</blockquote>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">require.context()</code>可以给这个函数传入三个参数：一个要搜索的目录，一个标记表示是否还搜索其子目录， 以及一个匹配文件的正则表达式。</li>
+  <li><code class="language-plaintext highlighter-rouge">返回一个（require）函数</code>，此函数可以接收一个参数：request。
+此导出函数有三个属性：<code class="language-plaintext highlighter-rouge">resolve, keys, id</code>
+    <ul>
+      <li>resolve 是一个函数，它返回 request 被解析后得到的模块 id (传入keys某个模块，返回绝对路径)</li>
+      <li>keys 也是一个函数，返回匹配成功模块的名字组成的数组</li>
+      <li>id 是 context module 的模块 id. 它可能在你使用 module.hot.accept 时会用到。</li>
+    </ul>
+
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">require</span><span class="p">.</span><span class="nx">context</span><span class="p">(</span><span class="dl">'</span><span class="s1">./test</span><span class="dl">'</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">test</span><span class="se">\.</span><span class="sr">js$/</span><span class="p">);</span>
+  <span class="c1">//（创建出）一个 context，其中文件来自 test 目录，request 以 `.test.js` 结尾。</span>
+
+  <span class="kd">const</span> <span class="nx">cache</span> <span class="o">=</span> <span class="p">{};</span>
+
+  <span class="kd">function</span> <span class="nx">importAll</span> <span class="p">(</span><span class="nx">r</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">r</span><span class="p">.</span><span class="nx">keys</span><span class="p">().</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">key</span> <span class="o">=&gt;</span> <span class="nx">cache</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">r</span><span class="p">(</span><span class="nx">key</span><span class="p">));</span>
+  <span class="p">}</span>
+
+  <span class="nx">importAll</span><span class="p">(</span><span class="nx">require</span><span class="p">.</span><span class="nx">context</span><span class="p">(</span><span class="dl">'</span><span class="s1">../components/</span><span class="dl">'</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">js$/</span><span class="p">));</span>
+  <span class="c1">// 在构建时(build-time)，所有被 require 的模块都会被填充到 cache 对象中。</span>
+
+</code></pre></div>    </div>
+  </li>
+</ul>
+
+<p><a href="https://webpack.docschina.org/guides/dependency-management/#requirecontext">webpack require.context API</a></p>
+
+<h1 id="应用场景">应用场景</h1>
+
+<h2 id="js自动导入">js自动导入</h2>
+
+<p>如果遇到从一个文件夹引入很多模块的情况,可以使用这个api,它会遍历文件夹中的指定文件,然后自动导入,使得不需要每次显式的调用import导入模块。</p>
+
+<blockquote>
+  <p>举例<code class="language-plaintext highlighter-rouge">vue-element-admin</code>里的vuex store &gt; index.js</p>
+</blockquote>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nx">Vue</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">vue</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">Vuex</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">vuex</span><span class="dl">'</span>
+<span class="k">import</span> <span class="nx">getters</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">./getters</span><span class="dl">'</span>
+
+<span class="nx">Vue</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">Vuex</span><span class="p">)</span>
+
+<span class="c1">// https://webpack.js.org/guides/dependency-management/#requirecontext</span>
+<span class="kd">const</span> <span class="nx">modulesFiles</span> <span class="o">=</span> <span class="nx">require</span><span class="p">.</span><span class="nx">context</span><span class="p">(</span><span class="dl">'</span><span class="s1">./modules</span><span class="dl">'</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">js$/</span><span class="p">)</span>
+
+<span class="c1">// you do not need `import app from './modules/app'`</span>
+<span class="c1">// it will auto require all vuex module from modules file</span>
+<span class="kd">const</span> <span class="nx">modules</span> <span class="o">=</span> <span class="nx">modulesFiles</span><span class="p">.</span><span class="nx">keys</span><span class="p">().</span><span class="nx">reduce</span><span class="p">((</span><span class="nx">modules</span><span class="p">,</span> <span class="nx">modulePath</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// set './app.js' =&gt; 'app'</span>
+  <span class="kd">const</span> <span class="nx">moduleName</span> <span class="o">=</span> <span class="nx">modulePath</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="sr">/^</span><span class="se">\.\/(</span><span class="sr">.*</span><span class="se">)\.\w</span><span class="sr">+$/</span><span class="p">,</span> <span class="dl">'</span><span class="s1">$1</span><span class="dl">'</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">modulesFiles</span><span class="p">(</span><span class="nx">modulePath</span><span class="p">)</span>
+  <span class="nx">modules</span><span class="p">[</span><span class="nx">moduleName</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">.</span><span class="k">default</span>
+  <span class="k">return</span> <span class="nx">modules</span>
+<span class="p">},</span> <span class="p">{})</span>
+
+<span class="kd">const</span> <span class="nx">store</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Vuex</span><span class="p">.</span><span class="nx">Store</span><span class="p">({</span>
+  <span class="nx">modules</span><span class="p">,</span>
+  <span class="nx">getters</span>
+<span class="p">})</span>
+
+<span class="k">export</span> <span class="k">default</span> <span class="nx">store</span>
+</code></pre></div></div>
+
+<h2 id="svg自动导入">svg自动导入</h2>
+
+<ol>
+  <li>下载安装<code class="language-plaintext highlighter-rouge">svg-sprite-loader</code></li>
+</ol>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install svg-sprite-loader -D
+</code></pre></div></div>
+
+<ol>
+  <li>配置<code class="language-plaintext highlighter-rouge">vue.config.js</code>文件</li>
+</ol>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">chainWebpack</span> <span class="p">(</span><span class="nx">config</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="c1">// set svg-sprite-loader</span>
+    <span class="nx">config</span><span class="p">.</span><span class="nx">module</span>
+      <span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="dl">'</span><span class="s1">svg</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">exclude</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">resolve</span><span class="p">(</span><span class="dl">'</span><span class="s1">src/svg</span><span class="dl">'</span><span class="p">))</span>
+      <span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+    <span class="nx">config</span><span class="p">.</span><span class="nx">module</span>
+      <span class="p">.</span><span class="nx">rule</span><span class="p">(</span><span class="dl">'</span><span class="s1">icons</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="sr">/</span><span class="se">\.</span><span class="sr">svg$/</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">include</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">resolve</span><span class="p">(</span><span class="dl">'</span><span class="s1">src/svg</span><span class="dl">'</span><span class="p">))</span>
+      <span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+      <span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="dl">'</span><span class="s1">svg-sprite-loader</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">loader</span><span class="p">(</span><span class="dl">'</span><span class="s1">svg-sprite-loader</span><span class="dl">'</span><span class="p">)</span>
+      <span class="p">.</span><span class="nx">options</span><span class="p">({</span>
+        <span class="na">symbolId</span><span class="p">:</span> <span class="dl">'</span><span class="s1">icon-[name]</span><span class="dl">'</span>
+      <span class="p">})</span>
+      <span class="p">.</span><span class="nx">end</span><span class="p">()</span>
+  <span class="p">}</span>
+</code></pre></div></div>
+
+<ol>
+  <li>创建<code class="language-plaintext highlighter-rouge">svg-icon</code>组件</li>
+</ol>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;template&gt;</span>
+    <span class="nt">&lt;svg</span> <span class="na">:class=</span><span class="s">"svgClass"</span> <span class="na">aria-hidden=</span><span class="s">"true"</span> <span class="na">v-on=</span><span class="s">"$listeners"</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;use</span> <span class="na">:href=</span><span class="s">"iconName"</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;/svg&gt;</span>
+  <span class="nt">&lt;/template&gt;</span>
+</code></pre></div></div>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">export</span> <span class="k">default</span> <span class="p">{</span>
+  <span class="na">name</span><span class="p">:</span> <span class="dl">'</span><span class="s1">SvgIcon</span><span class="dl">'</span><span class="p">,</span>
+  <span class="na">props</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">iconClass</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">type</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+      <span class="na">required</span><span class="p">:</span> <span class="kc">true</span>
+    <span class="p">},</span>
+    <span class="na">className</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">type</span><span class="p">:</span> <span class="nb">String</span><span class="p">,</span>
+      <span class="na">default</span><span class="p">:</span> <span class="dl">''</span>
+    <span class="p">}</span>
+  <span class="p">},</span>
+  <span class="na">computed</span><span class="p">:</span> <span class="p">{</span>
+    <span class="nx">iconName</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="s2">`#icon-</span><span class="p">${</span><span class="k">this</span><span class="p">.</span><span class="nx">iconClass</span><span class="p">}</span><span class="s2">`</span>
+    <span class="p">},</span>
+    <span class="nx">svgClass</span> <span class="p">()</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">className</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="dl">'</span><span class="s1">svg-icon </span><span class="dl">'</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">className</span>
+      <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="dl">'</span><span class="s1">svg-icon</span><span class="dl">'</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nc">.svg-icon</span> <span class="p">{</span>
+  <span class="nl">width</span><span class="p">:</span> <span class="m">1em</span><span class="p">;</span>
+  <span class="nl">height</span><span class="p">:</span> <span class="m">1em</span><span class="p">;</span>
+  <span class="nl">vertical-align</span><span class="p">:</span> <span class="m">-0.15em</span><span class="p">;</span>
+  <span class="py">fill</span><span class="p">:</span> <span class="n">currentColor</span><span class="p">;</span>
+  <span class="nl">overflow</span><span class="p">:</span> <span class="nb">hidden</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></div></div>
+
+<ol>
+  <li>自动化导入svg文件</li>
+</ol>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="kd">const</span> <span class="nx">req</span> <span class="o">=</span> <span class="nx">require</span><span class="p">.</span><span class="nx">context</span><span class="p">(</span><span class="dl">'</span><span class="s1">@/svg</span><span class="dl">'</span><span class="p">,</span> <span class="kc">false</span><span class="p">,</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">svg$/</span><span class="p">)</span>
+  <span class="kd">const</span> <span class="nx">requireAll</span> <span class="o">=</span> <span class="nx">requireContext</span> <span class="o">=&gt;</span> <span class="nx">requireContext</span><span class="p">.</span><span class="nx">keys</span><span class="p">().</span><span class="nx">map</span><span class="p">(</span><span class="nx">requireContext</span><span class="p">)</span>
+  <span class="nx">requireAll</span><span class="p">(</span><span class="nx">req</span><span class="p">)</span>
+</code></pre></div></div>
+
+<ol>
+  <li>最终使用</li>
+</ol>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="k">import</span> <span class="nx">Vue</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">vue</span><span class="dl">'</span>
+  <span class="k">import</span> <span class="nx">SvgIcon</span> <span class="k">from</span> <span class="dl">'</span><span class="s1">@/components/SvgIcon.vue</span><span class="dl">'</span>
+  <span class="nx">Vue</span><span class="p">.</span><span class="nx">component</span><span class="p">(</span><span class="dl">'</span><span class="s1">svg-icon</span><span class="dl">'</span><span class="p">,</span> <span class="nx">SvgIcon</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-html highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;svg-icon</span> <span class="na">icon-class=</span><span class="s">"wechat"</span><span class="nt">/&gt;</span>
+</code></pre></div></div>
+
+<blockquote>
+  <p>Tip: svg文件目录为：<code class="language-plaintext highlighter-rouge">src/svg</code> ,svg文件列表为： <code class="language-plaintext highlighter-rouge">wechat.svg、user.svg……</code></p>
+</blockquote>
+
+<blockquote>
+  <p><a href="https://juejin.im/post/6844903517564436493">手摸手，带你优雅的使用 icon</a></p>
+</blockquote>
+:ET

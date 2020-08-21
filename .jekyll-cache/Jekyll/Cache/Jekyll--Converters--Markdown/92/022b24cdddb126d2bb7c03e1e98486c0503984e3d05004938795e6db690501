@@ -1,0 +1,42 @@
+I"<h2 id="mongodb安装">MongoDB安装</h2>
+<p>直接采用brew方式安装
+<code class="language-plaintext highlighter-rouge">sudo brew install mongodb</code></p>
+
+<h2 id="运行mongodb">运行MongoDB</h2>
+<ol>
+  <li>创建一个数据库存储目录 /data/db：
+<code class="language-plaintext highlighter-rouge">sudo mkdir -p /data/db</code>(运行前需要手动创建)
+<code class="language-plaintext highlighter-rouge">sudo chown -R 用户名 /data/db </code>(开放权限)</li>
+  <li>配置环境变量（这里我的shell是zsh)
+    <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">ll</span> <span class="o">-</span><span class="nx">a</span>
+  <span class="nx">vi</span> <span class="p">.</span><span class="nx">zshrc</span>
+  <span class="c1">// 按键i 插入， esc后，输入命令 :wq 保存退出</span>
+  <span class="k">export</span> <span class="nx">PATH</span><span class="o">=</span><span class="sr">/usr/</span><span class="nx">local</span><span class="o">/</span><span class="nx">Cellar</span><span class="o">/</span><span class="nx">mongodb</span><span class="o">/</span><span class="mf">4.0</span><span class="p">.</span><span class="mi">3</span><span class="nx">_1</span><span class="o">/</span><span class="nx">bin</span><span class="p">:</span><span class="nx">$</span><span class="p">{</span><span class="nx">PATH</span><span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>启动mongodb <code class="language-plaintext highlighter-rouge">~/mongod</code></p>
+  </li>
+  <li>关闭服务
+    <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">// 方式1</span>
+<span class="nx">mongod</span> <span class="o">--</span><span class="nx">shutdown</span>
+<span class="c1">//方式2</span>
+<span class="nx">control</span> <span class="o">+</span> <span class="nx">c</span>
+<span class="c1">// 方式3</span>
+<span class="nx">use</span> <span class="nx">admin</span><span class="p">;</span>
+<span class="nx">db</span><span class="p">.</span><span class="nx">shutdownServer</span><span class="p">();</span>
+</code></pre></div>    </div>
+    <h2 id="mongodb可视化工具">MongoDB可视化工具</h2>
+    <h3 id="adminmongo">adminMongo</h3>
+    <ul>
+      <li>Navigate to folder &amp; install adminMongo: <code class="language-plaintext highlighter-rouge">git clone https://github.com/mrvautin/adminMongo.git</code> &amp;&amp; <code class="language-plaintext highlighter-rouge">cd adminMongo</code></li>
+      <li>Install dependencies: <code class="language-plaintext highlighter-rouge">npm install</code></li>
+      <li>Start application: <code class="language-plaintext highlighter-rouge">npm start</code> or <code class="language-plaintext highlighter-rouge">node app</code></li>
+      <li>Visit <code class="language-plaintext highlighter-rouge">http://127.0.0.1:1234</code> in your browser</li>
+    </ul>
+  </li>
+</ol>
+
+<h3 id="robo-3t">Robo 3T</h3>
+<p>官网地址 https://robomongo.org</p>
+:ET

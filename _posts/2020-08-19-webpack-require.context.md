@@ -20,22 +20,21 @@ tag:
   - keys 也是一个函数，返回匹配成功模块的名字组成的数组
   - id 是 context module 的模块 id. 它可能在你使用 module.hot.accept 时会用到。
 
-``` js
-  require.context('./test', false, /\.test\.js$/);
-  //（创建出）一个 context，其中文件来自 test 目录，request 以 `.test.js` 结尾。
+  ``` js
+    require.context('./test', false, /\.test\.js$/);
+    //（创建出）一个 context，其中文件来自 test 目录，request 以 `.test.js` 结尾。
 
-  const cache = {};
+    const cache = {};
 
-  function importAll (r) {
-    r.keys().forEach(key => cache[key] = r(key));
-  }
+    function importAll (r) {
+      r.keys().forEach(key => cache[key] = r(key));
+    }
 
-  importAll(require.context('../components/', true, /\.js$/));
-  // 在构建时(build-time)，所有被 require 的模块都会被填充到 cache 对象中。
+    importAll(require.context('../components/', true, /\.js$/));
+    // 在构建时(build-time)，所有被 require 的模块都会被填充到 cache 对象中。
 
-```
-
-[webpack require.context API](https://webpack.docschina.org/guides/dependency-management/#requirecontext)
+  ```
+  [webpack require.context API](https://webpack.docschina.org/guides/dependency-management/#requirecontext)
 
 # 应用场景
 
@@ -76,104 +75,90 @@ export default store
 ## svg自动导入
 
 1. 下载安装`svg-sprite-loader`
-
-``` 
-npm install svg-sprite-loader -D
-```
-
+  ``` 
+    npm install svg-sprite-loader -D
+  ```
 2. 配置`vue.config.js`文件
+  ``` js 
+    chainWebpack (config) {
 
-``` js 
-  chainWebpack (config) {
-
-    // set svg-sprite-loader
-    config.module
-      .rule('svg')
-      .exclude.add(resolve('src/svg'))
-      .end()
-    config.module
-      .rule('icons')
-      .test(/\.svg$/)
-      .include.add(resolve('src/svg'))
-      .end()
-      .use('svg-sprite-loader')
-      .loader('svg-sprite-loader')
-      .options({
-        symbolId: 'icon-[name]'
-      })
-      .end()
-  }
-```
-
-3. 创建`svg-icon`组件
-
-``` html
-  <template>
-    <svg :class="svgClass" aria-hidden="true" v-on="$listeners">
-      <use :href="iconName" />
-    </svg>
-  </template>
-```
-
-```js
-export default {
-  name: 'SvgIcon',
-  props: {
-    iconClass: {
-      type: String,
-      required: true
-    },
-    className: {
-      type: String,
-      default: ''
+      // set svg-sprite-loader
+      config.module
+        .rule('svg')
+        .exclude.add(resolve('src/svg'))
+        .end()
+      config.module
+        .rule('icons')
+        .test(/\.svg$/)
+        .include.add(resolve('src/svg'))
+        .end()
+        .use('svg-sprite-loader')
+        .loader('svg-sprite-loader')
+        .options({
+          symbolId: 'icon-[name]'
+        })
+        .end()
     }
-  },
-  computed: {
-    iconName () {
-      return `#icon-${this.iconClass}`
-    },
-    svgClass () {
-      if (this.className) {
-        return 'svg-icon ' + this.className
-      } else {
-        return 'svg-icon'
+  ```
+3. 创建`svg-icon`组件
+  ``` html
+    <template>
+      <svg :class="svgClass" aria-hidden="true" v-on="$listeners">
+        <use :href="iconName" />
+      </svg>
+    </template>
+  ```
+  ```js
+    export default {
+      name: 'SvgIcon',
+      props: {
+        iconClass: {
+          type: String,
+          required: true
+        },
+        className: {
+          type: String,
+          default: ''
+        }
+      },
+      computed: {
+        iconName () {
+          return `#icon-${this.iconClass}`
+        },
+        svgClass () {
+          if (this.className) {
+            return 'svg-icon ' + this.className
+          } else {
+            return 'svg-icon'
+          }
+        }
       }
     }
-  }
-}
-```
-
-``` css
-.svg-icon {
-  width: 1em;
-  height: 1em;
-  vertical-align: -0.15em;
-  fill: currentColor;
-  overflow: hidden;
-}
-
-```
-
+  ```
+  ``` css
+    .svg-icon {
+      width: 1em;
+      height: 1em;
+      vertical-align: -0.15em;
+      fill: currentColor;
+      overflow: hidden;
+    }
+  ```
 4. 自动化导入svg文件
-
-``` js
-  const req = require.context('@/svg', false, /\.svg$/)
-  const requireAll = requireContext => requireContext.keys().map(requireContext)
-  requireAll(req)
-```
-
+  ``` js
+    const req = require.context('@/svg', false, /\.svg$/)
+    const requireAll = requireContext => requireContext.keys().map(requireContext)
+    requireAll(req)
+  ```
 5. 最终使用
-
-``` js
-  import Vue from 'vue'
-  import SvgIcon from '@/components/SvgIcon.vue'
-  Vue.component('svg-icon', SvgIcon)
-```
-
-``` html
-  <svg-icon icon-class="wechat"/>
-```
-
+  ``` js
+    import Vue from 'vue'
+    import SvgIcon from '@/components/SvgIcon.vue'
+    Vue.component('svg-icon', SvgIcon)
+  ```
+  ``` html
+    <svg-icon icon-class="wechat"/>
+  ```
 > Tip: svg文件目录为：`src/svg` ,svg文件列表为： `wechat.svg、user.svg……`
 
 > [手摸手，带你优雅的使用 icon](https://juejin.im/post/6844903517564436493)

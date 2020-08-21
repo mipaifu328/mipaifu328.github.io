@@ -1,0 +1,98 @@
+I"!<blockquote>
+
+</blockquote>
+
+<h2 id="前言">前言</h2>
+
+<p>今天刚到的书，《CSS SECRETS》是我见过最漂亮的技术书。书中所有页码、章节号、攻略编号都是由纯粹的CSS计数器生成，颜色的选择和排版也是非常的独特。从今天开始，我也开始对这本书的探索和学习╰(￣▽￣)╮！</p>
+
+<hr />
+
+<h2 id="正文">正文</h2>
+
+<h3 id="查询最新的浏览器兼容信息">查询最新的浏览器兼容信息</h3>
+
+<p>在写样式的时候，一般遇到某些css选择器，不太确定浏览器是否支持。下面的几个网站都提供了及时有效的浏览器兼容信息：</p>
+
+<ul>
+  <li><a href="http://caniuse.com" target="_blank">Can I Use?</a></li>
+  <li><a href="http://webplatform.org" target="_blank">WebPlatform.org</a></li>
+  <li><a href="http://developer.mozilla.org" target="_blank">Mozilla Developer Network</a></li>
+</ul>
+
+<h3 id="css实现">CSS实现</h3>
+<ul>
+  <li>
+    <p>浏览器前缀(即便某些特性已得到浏览器支持，但在不同浏览器可能还有些细微的差异)
+<strong>应该把标准语法、无前缀排在最后面</strong>，通过层叠机制来确保哪条最终生效。</p>
+  </li>
+  <li>
+    <p><strong>提供回退机制</strong>，能确保你的网站不会在低版浏览器中挂掉，只是看起来不这么炫而已，举个例子，下面指定一个渐变色为背景时，应该在前面添加一行实色背景，取渐变色的平均色值。</p>
+  </li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span>
+	<span class="nl">background</span><span class="p">:</span><span class="nb">rgb</span><span class="p">(</span><span class="m">225</span><span class="p">,</span> <span class="m">128</span><span class="p">,</span> <span class="m">0</span><span class="p">);</span>
+	<span class="nl">background</span><span class="p">:</span><span class="n">-moz-linear-gradient</span><span class="p">(</span><span class="m">0deg</span><span class="p">,</span> <span class="no">yellow</span><span class="p">,</span> <span class="no">red</span><span class="p">);</span>
+	<span class="nl">background</span><span class="p">:</span><span class="n">-o-linear-gradient</span><span class="p">(</span><span class="m">0deg</span><span class="p">,</span> <span class="no">yellow</span><span class="p">,</span> <span class="no">red</span><span class="p">);</span>
+	<span class="nl">background</span><span class="p">:</span><span class="n">-webkit-linear-gradient</span><span class="p">(</span><span class="m">0deg</span><span class="p">,</span> <span class="no">yellow</span><span class="p">,</span> <span class="no">red</span><span class="p">);</span>
+	<span class="nl">background</span><span class="p">:</span><span class="n">linear-gradient</span><span class="p">(</span><span class="m">0deg</span><span class="p">,</span> <span class="no">yellow</span><span class="p">,</span> <span class="no">red</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>文中还提到@supports规则实现回退。<strong>必须慎用@supports</strong>实用性不高，毕竟同时要满足新属性（例如text-shadow）和支持@supports规则的浏览器范围太狭窄了。</li>
+</ul>
+
+<div class="language-css highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">h1</span> <span class="p">{</span> <span class="nl">color</span><span class="p">:</span> <span class="no">gray</span><span class="p">;</span> <span class="p">}</span>
+<span class="k">@supports</span> <span class="p">(</span><span class="n">text-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">0</span> <span class="m">.3em</span> <span class="no">gray</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nt">h1</span><span class="p">{</span>
+		<span class="nl">color</span><span class="p">:</span> <span class="nb">transparent</span><span class="p">;</span>
+		<span class="nl">text-shadow</span><span class="p">:</span> <span class="m">0</span> <span class="m">0</span> <span class="m">.3em</span> <span class="no">gray</span><span class="p">;</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h3 id="js实现">JS实现</h3>
+<ul>
+  <li>做一些特性检测，然后给根元素加一些辅助类。（<strong>核心思路：检测任一元素的element.style对象是否存在该样式属性</strong>）</li>
+</ul>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">testProperty</span><span class="p">(</span><span class="nx">property</span><span class="p">){</span>
+	<span class="kd">var</span> <span class="nx">root</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">documentElement</span><span class="p">;</span>
+	
+	<span class="k">if</span><span class="p">(</span><span class="nx">property</span> <span class="k">in</span> <span class="nx">root</span><span class="p">.</span><span class="nx">style</span><span class="p">){</span>
+		<span class="nx">root</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">property</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">());</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="nx">root</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="dl">'</span><span class="s1">no-</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">property</span><span class="p">.</span><span class="nx">toLowerCase</span><span class="p">());</span>
+	<span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<ul>
+  <li>如果想要检测某个<strong>属性值</strong>是否支持。
+（思路：将属性值赋值到对应的属性中，然后检查浏览器是否还保存着这个值。这个过程会改变元素的样式，因此我们需要一个隐藏元素）</li>
+</ul>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">testValue</span><span class="p">(</span><span class="nx">id</span><span class="p">,</span><span class="nx">value</span><span class="p">,</span><span class="nx">property</span><span class="p">){</span>
+	<span class="kd">var</span> <span class="nx">dummy</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="dl">'</span><span class="s1">p</span><span class="dl">'</span><span class="p">);</span>
+	<span class="nx">dummy</span><span class="p">.</span><span class="nx">style</span><span class="p">[</span><span class="nx">property</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+	
+	<span class="k">if</span><span class="p">(</span><span class="nx">dummy</span><span class="p">.</span><span class="nx">style</span><span class="p">[</span><span class="nx">property</span><span class="p">]){</span>
+		<span class="nx">root</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">id</span><span class="p">);</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+	<span class="p">}</span>
+
+	<span class="nx">root</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="dl">'</span><span class="s1">no-</span><span class="dl">'</span> <span class="o">+</span> <span class="nx">id</span><span class="p">);</span>
+	<span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<h2 id="后记">后记</h2>
+
+<p>这是第一次技术类文章，有很多不足，如果有什么错误或者补充，后续再加上吧。</p>
+
+<p>—— Mipaifu328 后记于 2016.09.02</p>
+:ET

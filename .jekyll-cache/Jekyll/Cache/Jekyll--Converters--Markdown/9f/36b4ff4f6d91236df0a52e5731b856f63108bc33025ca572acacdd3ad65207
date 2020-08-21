@@ -1,0 +1,110 @@
+I"�+<p>本来按照事件顺序，小程序初始化时触发App里的onLaunch，后面再执行页面Page里的onLoad，但是在onLaunch里请求获取是否有权限，等待返回值的时候Page里的onLoad事件就已经执行了。</p>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//app.js</span>
+<span class="nx">App</span><span class="p">({</span>
+  <span class="na">onLaunch</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">onLaunch</span><span class="dl">'</span><span class="p">);</span>
+    <span class="nx">wx</span><span class="p">.</span><span class="nx">request</span><span class="p">({</span>
+      <span class="na">url</span><span class="p">:</span> <span class="dl">'</span><span class="s1">test.php</span><span class="dl">'</span><span class="p">,</span> <span class="c1">//仅为示例，并非真实的接口地址</span>
+      <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+      <span class="p">},</span>
+      <span class="na">success</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">onLaunch-request-success</span><span class="dl">'</span><span class="p">);</span>
+        <span class="c1">// 将employId赋值给全局变量，提供给页面做判断</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">globalData</span><span class="p">.</span><span class="nx">employId</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">employId</span><span class="p">;</span>   
+      <span class="p">}</span>
+    <span class="p">})</span>
+  <span class="p">},</span>
+  <span class="na">globalData</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">employId</span><span class="p">:</span> <span class="dl">''</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+</code></pre></div></div>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//index.js</span>
+<span class="c1">//获取应用实例</span>
+<span class="kd">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">getApp</span><span class="p">()</span>
+
+<span class="nx">Page</span><span class="p">({</span>
+  <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">albumDisabled</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">bindDisabled</span><span class="p">:</span> <span class="kc">false</span>
+  <span class="p">},</span>
+  <span class="na">onLoad</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">onLoad</span><span class="dl">'</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="dl">'</span><span class="s1">onLoad app.globalData.employId = </span><span class="dl">'</span> <span class="o">+</span> <span class="nx">app</span><span class="p">.</span><span class="nx">globalData</span><span class="p">.</span><span class="nx">employId</span><span class="p">);</span>
+    <span class="c1">//判断是用户是否绑定了</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">globalData</span><span class="p">.</span><span class="nx">employId</span> <span class="o">&amp;&amp;</span> <span class="nx">app</span><span class="p">.</span><span class="nx">globalData</span><span class="p">.</span><span class="nx">employId</span> <span class="o">!=</span> <span class="dl">''</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">setData</span><span class="p">({</span>
+        <span class="na">albumDisabled</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="na">bindDisabled</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">});</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+</code></pre></div></div>
+<p>控制台打印的结果是</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>onLaunch
+onLoad
+onLoad app.globalData.employId = 
+onLaunch-request-success
+</code></pre></div></div>
+<p>要是能等完onLaunch请求完再执行Page的onLoad方法那该多好。
+这里采用的方法是<strong>定义一个回调函数</strong>。
+Page页面判断一下当前app.globalData.employId是否有值，如果没有（第一次）则定义定义一个app方法（回调函数）<code class="language-plaintext highlighter-rouge"> app.employIdCallback = employId =&gt; {...}</code>。
+App页面在请求success后判断时候有Page页面定义的回调方法，如果有就执行该方法。因为回调函数是在Page里面定义的所以方法作用域this是指向Page页面。</p>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//app.js</span>
+<span class="nx">App</span><span class="p">({</span>
+  <span class="na">onLaunch</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">wx</span><span class="p">.</span><span class="nx">request</span><span class="p">({</span>
+      <span class="na">url</span><span class="p">:</span> <span class="dl">'</span><span class="s1">test.php</span><span class="dl">'</span><span class="p">,</span> <span class="c1">//仅为示例，并非真实的接口地址</span>
+      <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+      <span class="p">},</span>
+      <span class="na">success</span><span class="p">:</span> <span class="kd">function</span><span class="p">(</span><span class="nx">res</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">globalData</span><span class="p">.</span><span class="nx">employId</span> <span class="o">=</span> <span class="nx">res</span><span class="p">.</span><span class="nx">employId</span><span class="p">;</span>
+        <span class="c1">//由于这里是网络请求，可能会在 Page.onLoad 之后才返回</span>
+        <span class="c1">// 所以此处加入 callback 以防止这种情况</span>
+        <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">employIdCallback</span><span class="p">){</span>
+           <span class="k">this</span><span class="p">.</span><span class="nx">employIdCallback</span><span class="p">(</span><span class="nx">res</span><span class="p">.</span><span class="nx">employId</span><span class="p">);</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">})</span>
+  <span class="p">},</span>
+  <span class="na">globalData</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">employId</span><span class="p">:</span> <span class="dl">''</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+</code></pre></div></div>
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">//index.js</span>
+<span class="c1">//获取应用实例</span>
+<span class="kd">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">getApp</span><span class="p">()</span>
+
+<span class="nx">Page</span><span class="p">({</span>
+  <span class="na">data</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">albumDisabled</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="na">bindDisabled</span><span class="p">:</span> <span class="kc">false</span>
+  <span class="p">},</span>
+  <span class="na">onLoad</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="c1">//判断是用户是否绑定了</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">app</span><span class="p">.</span><span class="nx">globalData</span><span class="p">.</span><span class="nx">employId</span> <span class="o">&amp;&amp;</span> <span class="nx">app</span><span class="p">.</span><span class="nx">globalData</span><span class="p">.</span><span class="nx">employId</span> <span class="o">!=</span> <span class="dl">''</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">setData</span><span class="p">({</span>
+        <span class="na">albumDisabled</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+        <span class="na">bindDisabled</span><span class="p">:</span> <span class="kc">true</span>
+      <span class="p">});</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="c1">// 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回</span>
+      <span class="c1">// 所以此处加入 callback 以防止这种情况</span>
+      <span class="nx">app</span><span class="p">.</span><span class="nx">employIdCallback</span> <span class="o">=</span> <span class="nx">employId</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">employId</span> <span class="o">!=</span> <span class="dl">''</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">this</span><span class="p">.</span><span class="nx">setData</span><span class="p">({</span>
+            <span class="na">albumDisabled</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+            <span class="na">bindDisabled</span><span class="p">:</span> <span class="kc">true</span>
+          <span class="p">});</span>
+        <span class="p">}</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">})</span>
+</code></pre></div></div>
+<p>这样的话，就能实现想要的结果。执行顺序就是：</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[App] onLaunch -&gt; [Page] onLoad -&gt; [App] onLaunch sucess callback
+</code></pre></div></div>
+:ET

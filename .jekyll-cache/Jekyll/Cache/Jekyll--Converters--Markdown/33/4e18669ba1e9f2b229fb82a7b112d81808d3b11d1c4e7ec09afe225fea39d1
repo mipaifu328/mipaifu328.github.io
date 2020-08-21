@@ -1,0 +1,43 @@
+I"u<h1 id="环境">环境</h1>
+<ul>
+  <li>安装nodejs
+<a href="https://nodejs.org/zh-cn/">官网下载地址</a>，下载安装完验证<code class="language-plaintext highlighter-rouge">node --version</code>，如果显示版本号则安装成功！</li>
+  <li>安装vue-cli
+通过npm命令安装vue-cli<code class="language-plaintext highlighter-rouge">npm install --global vue-cli</code>。（全局安装，否则在其他目录下又要重新安装一次vue-cli）</li>
+  <li>创建vue-cli项目
+输入命令<code class="language-plaintext highlighter-rouge">vue init webpack vuetest</code>，显示项目信息选项：<code class="language-plaintext highlighter-rouge">Project name (vuetest)</code>,<code class="language-plaintext highlighter-rouge">Project description (A Vue.js Project)</code>……选择完Installing project dependencies …vue-cli模板项目就创建成功。</li>
+</ul>
+
+<h1 id="常见问题">常见问题</h1>
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">npm run build</code>后，index页面访问不了。
+ 解决方法：在 <code class="language-plaintext highlighter-rouge">config/index.js</code>中修改<code class="language-plaintext highlighter-rouge">build:{assetsPublicPath: './'}</code>
+    <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">build</span><span class="p">:</span> <span class="p">{</span>
+  <span class="c1">// Template for index.html</span>
+  <span class="nl">index</span><span class="p">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="dl">'</span><span class="s1">../dist/index.html</span><span class="dl">'</span><span class="p">),</span>
+
+  <span class="c1">// Paths</span>
+  <span class="nx">assetsRoot</span><span class="p">:</span> <span class="nx">path</span><span class="p">.</span><span class="nx">resolve</span><span class="p">(</span><span class="nx">__dirname</span><span class="p">,</span> <span class="dl">'</span><span class="s1">../dist</span><span class="dl">'</span><span class="p">),</span>
+  <span class="nx">assetsSubDirectory</span><span class="p">:</span> <span class="dl">'</span><span class="s1">static</span><span class="dl">'</span><span class="p">,</span>
+  <span class="nx">assetsPublicPath</span><span class="p">:</span> <span class="dl">'</span><span class="s1">./</span><span class="dl">'</span><span class="p">,</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li><code class="language-plaintext highlighter-rouge">npm run build</code>后，css里的背景图片显示路径错误，图片路径引用放在assets目录下。
+ 解决方法：在 <code class="language-plaintext highlighter-rouge">utils.js</code>中增加<code class="language-plaintext highlighter-rouge">publicPath: '../../'</code>。
+    <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c1">// Extract CSS when that option is specified</span>
+  <span class="c1">// (which is the case during production build)</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">options</span><span class="p">.</span><span class="nx">extract</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">ExtractTextPlugin</span><span class="p">.</span><span class="nx">extract</span><span class="p">({</span>
+      <span class="na">use</span><span class="p">:</span> <span class="nx">loaders</span><span class="p">,</span>
+      <span class="na">fallback</span><span class="p">:</span> <span class="dl">'</span><span class="s1">vue-style-loader</span><span class="dl">'</span><span class="p">,</span>
+      <span class="na">publicPath</span><span class="p">:</span> <span class="dl">'</span><span class="s1">../../</span><span class="dl">'</span>
+    <span class="p">})</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">[</span><span class="dl">'</span><span class="s1">vue-style-loader</span><span class="dl">'</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">loaders</span><span class="p">)</span>
+  <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+</ul>
+:ET

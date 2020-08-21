@@ -1,0 +1,149 @@
+I"X/<h1 id="相关文档api">相关文档API</h1>
+
+<ul>
+  <li><a href="https://vue-test-utils.vuejs.org/zh/">Vue Test Utils</a></li>
+  <li><a href="https://github.com/facebook/jest">JEST github</a></li>
+  <li><a href="http://facebook.github.io/jest/docs/zh-Hans/getting-started.html">Jest 中文文档</a></li>
+</ul>
+
+<h1 id="介绍">介绍</h1>
+
+<p>主流的 JavaScript 测试运行器有很多，但 Vue Test Utils 都能够支持。官方主要推荐其中的两个测试运行器，本文主要讨论的是<code class="language-plaintext highlighter-rouge">jest</code>。</p>
+
+<blockquote>
+  <ul>
+    <li>jest 是功能最全的测试运行器。它所需的配置是最少的，默认安装了 JSDOM，内置断言且命令行的用户体验非常好。不过你需要一个能够将单文件组件导入到测试中的预处理器。我们已经创建了 vue-jest 预处理器来处理最常见的单文件组件特性，但仍不是 vue-loader 100% 的功能。</li>
+    <li>mocha-webpack 是一个 webpack + Mocha 的包裹器，同时包含了更顺畅的接口和侦听模式。这些设置的好处在于我们能够通过 webpack + vue-loader 得到完整的单文件组件支持，但这本身是需要很多配置的。</li>
+  </ul>
+</blockquote>
+
+<h1 id="jest-基础">JEST 基础</h1>
+
+<p>最简单的demo</p>
+<ol>
+  <li>npm 安装 jest <code class="language-plaintext highlighter-rouge">npm install --save-dev jest</code></li>
+  <li>创建sum.js、测试文件sum.test.js
+    <div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1">// sum.js</span>
+ <span class="kd">function</span> <span class="nx">sum</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+   <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span>
+ <span class="p">}</span>
+ <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">sum</span><span class="p">;</span>
+
+ <span class="c1">// sum.test.js</span>
+ <span class="kd">const</span> <span class="nx">sum</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">'</span><span class="s1">./sum</span><span class="dl">'</span><span class="p">);</span>
+ <span class="nx">describe</span><span class="p">(</span><span class="dl">'</span><span class="s1">Calculate</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+   <span class="nx">test</span><span class="p">(</span><span class="dl">'</span><span class="s1">1 + 2 = 3</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+     <span class="nx">expect</span><span class="p">(</span><span class="nx">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+   <span class="p">});</span> 
+   <span class="nx">it</span><span class="p">(</span><span class="dl">'</span><span class="s1">1 + 2 = 4</span><span class="dl">'</span><span class="p">,</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
+     <span class="nx">expect</span><span class="p">(</span><span class="nx">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)).</span><span class="nx">toBe</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+   <span class="p">});</span> 
+ <span class="p">});</span>
+</code></pre></div>    </div>
+  </li>
+  <li>配置你的<code class="language-plaintext highlighter-rouge">package.json</code>：
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="p">{</span>
+   <span class="dl">"</span><span class="s2">scripts</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+     <span class="dl">"</span><span class="s2">test</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">jest</span><span class="dl">"</span>
+   <span class="p">}</span>
+ <span class="p">}</span>
+</code></pre></div>    </div>
+  </li>
+  <li>测试文件匹配（jest运行哪些测试文件）
+  配置项<code class="language-plaintext highlighter-rouge">testRegex</code>[string | array<string>]，默认值是 (/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$
+</string>    <blockquote>
+      <p>默认情况下，Jest 将会递归的找到整个工程里所有 .spec.js 或 .test.js 扩展名的文件。如果这不符合你的需求，你也可以在 package.json 里的配置段落中改变它的 testRegex。</p>
+    </blockquote>
+
+    <blockquote>
+      <p>Jest 推荐你在被测试代码的所在目录下创建一个 <strong>tests</strong> 目录,但你也可以为你的测试文件随意设计自己习惯的文件结构。不过要当心 Jest 会为快照测试在临近测试文件的地方创建一个 <strong>snapshots</strong> 目录。</p>
+    </blockquote>
+
+    <p>更多文档内容请移步止<a href="https://jestjs.io/docs/zh-Hans/configuration">Jest 配置文档</a></p>
+  </li>
+  <li>运行 <code class="language-plaintext highlighter-rouge">npm run test</code>
+    <div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nx">FAIL</span>  <span class="nx">jestDemo</span><span class="o">/</span><span class="nx">sum</span><span class="p">.</span><span class="nx">test</span><span class="p">.</span><span class="nx">js</span>
+   <span class="nx">Calculate</span>
+     <span class="err">✓</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">(</span><span class="mi">2</span> <span class="nx">ms</span><span class="p">)</span>
+     <span class="err">✕</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">=</span> <span class="mi">4</span> <span class="p">(</span><span class="mi">2</span> <span class="nx">ms</span><span class="p">)</span>
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<blockquote>
+  <p>测试的写法为三步，引入测试内容，运行测试内容，最后做一个断言进行比较，是否达到预期。</p>
+</blockquote>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">describe</code>: 测试集合</li>
+  <li><code class="language-plaintext highlighter-rouge">test/it</code>： 断言，两者相同，可能为了兼容mocha。该方法有两个参数，第一个是字符串描述，第二个是执行方法（测试代码）</li>
+  <li><code class="language-plaintext highlighter-rouge">expect</code>： 预期，执行一个方法然后和预期值匹配是否符合。
+常见的匹配方法：
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">toBe</code> 使用 Object.is 判断是否严格相等。</li>
+      <li><code class="language-plaintext highlighter-rouge">toEqual</code> 递归检查对象或数组的每个字段。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeNull</code> 只匹配 null。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeUndefined</code> 只匹配 undefined。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeDefined</code> 只匹配非 undefined。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeTruthy</code> 只匹配真。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeFalsy</code> 只匹配假。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeGreaterThan</code> 实际值大于期望。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeGreaterThanOrEqual</code> 实际值大于或等于期望值</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeLessThan</code> 实际值小于期望值。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeLessThanOrEqual</code> 实际值小于或等于期望值。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeCloseTo</code> 比较浮点数的值，避免误差。</li>
+      <li><code class="language-plaintext highlighter-rouge">toMatch</code> 正则匹配。</li>
+      <li><code class="language-plaintext highlighter-rouge">toContain</code> 判断数组中是否包含指定项。</li>
+      <li><code class="language-plaintext highlighter-rouge">toHaveProperty(keyPath, value)</code> 判断对象中是否包含指定属性。</li>
+      <li><code class="language-plaintext highlighter-rouge">toThrow</code> 判断是否抛出指定的异常。</li>
+      <li><code class="language-plaintext highlighter-rouge">toBeInstanceOf</code> 判断对象是否是某个类的实例，底层使用 instanceof。</li>
+    </ul>
+  </li>
+</ul>
+
+<h1 id="vue-项目中应用-jest">vue 项目中应用 JEST</h1>
+
+<p><a href="https://vue-test-utils.vuejs.org/zh/installation/#%E7%94%A8-jest-%E6%B5%8B%E8%AF%95%E5%8D%95%E6%96%87%E4%BB%B6%E7%BB%84%E4%BB%B6">官网文档</a></p>
+<blockquote>
+  <p>如果你已经有一个通过 Vue CLI 创建的工程并想支持其测试，则可以运行：</p>
+  <div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="c"># unit testing</span>
+  vue add @vue/unit-jest
+
+  <span class="c"># or:</span>
+   vue add @vue/unit-mocha
+
+  <span class="c"># end-to-end</span>
+   vue add @vue/e2e-cypress
+
+  <span class="c"># or:</span>
+  vue add @vue/e2e-nightwatch
+</code></pre></div>  </div>
+</blockquote>
+
+<ol>
+  <li>安装Jest 和 Vue Test Utils：<code class="language-plaintext highlighter-rouge">npm install --save-dev jest @vue/test-utils</code>。<br />
+  如果需要Jest处理 *.vue 文件，<code class="language-plaintext highlighter-rouge">npm install --save-dev vue-jest</code></li>
+  <li>配置文件</li>
+</ol>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span>
+  <span class="c1">//定义一个单元测试的脚本</span>
+  <span class="dl">"</span><span class="s2">scripts</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">test</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">jest</span><span class="dl">"</span>
+  <span class="p">}</span>
+  <span class="c1">// jest 配置项</span>
+  <span class="dl">"</span><span class="s2">jest</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+    <span class="dl">"</span><span class="s2">moduleFileExtensions</span><span class="dl">"</span><span class="p">:</span> <span class="p">[</span>
+      <span class="dl">"</span><span class="s2">js</span><span class="dl">"</span><span class="p">,</span>
+      <span class="dl">"</span><span class="s2">json</span><span class="dl">"</span><span class="p">,</span>
+      <span class="c1">// 告诉 Jest 处理 `*.vue` 文件</span>
+      <span class="dl">"</span><span class="s2">vue</span><span class="dl">"</span>
+    <span class="p">],</span>
+    <span class="dl">"</span><span class="s2">transform</span><span class="dl">"</span><span class="p">:</span> <span class="p">{</span>
+      <span class="c1">// 用 `vue-jest` 处理 `*.vue` 文件</span>
+      <span class="dl">"</span><span class="s2">.*</span><span class="se">\\</span><span class="s2">.(vue)$</span><span class="dl">"</span><span class="p">:</span> <span class="dl">"</span><span class="s2">vue-jest</span><span class="dl">"</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+:ET
